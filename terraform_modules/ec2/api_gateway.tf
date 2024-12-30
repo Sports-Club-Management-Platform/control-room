@@ -24,7 +24,7 @@ resource "aws_security_group" "vpc_link" {
 # Create an API Gateway VPC Link
 resource "aws_apigatewayv2_vpc_link" "vpc_link" {
   name              = "vpc-link"
-  subnet_ids        = var.private_subnet_ids
+  subnet_ids        = [element(var.private_subnet_ids, 0)]
   security_group_ids = [aws_security_group.vpc_link.id]
   tags = {
     Name = "vpc-link"
@@ -44,7 +44,7 @@ resource "aws_apigatewayv2_api" "http_api" {
 resource "aws_apigatewayv2_integration" "vpc_integration" {
   api_id             = aws_apigatewayv2_api.http_api.id
   integration_type   = "HTTP_PROXY"
-  integration_uri    = aws_lb.apis_lb.dns_name
+  integration_uri    = aws_lb_listener.listener_http.arn
   connection_type    = "VPC_LINK"
   connection_id      = aws_apigatewayv2_vpc_link.vpc_link.id
 
